@@ -29,7 +29,41 @@ class Async {
 
         void loop() {
             if (_taskList.first == nullptr) return;
-            _taskList.forEach(Async::_checkTask, _timingFunction, _maxTime, _lastTime);
+            TaskNode<TimeType>* before = _taskList.first;
+            TaskNode<TimeType>* node = _taskList.first;
+            bool timeOverflowStage = false;
+
+            while (node != nullptr) {
+
+                TimeType time = _timingFunction();
+                if (_lastTime > time) {
+                    before = _taskList.first;
+                    node = _taskList.first;
+                    timeOverflowStage = true;
+                }
+                _lastTime = time;
+
+                if (node == _taskList.first) {
+                    bool isFinished = _checkTask(node -> value, timeOverflowStage);
+                    if (isFinished) {
+                        _taskList.removeFirst();
+                        node = _taskList.first;
+                        before = _taskList.first;
+                    } else {
+                        node = node -> next;
+                    }
+                } else {
+                    bool isFinished = _checkTask(node -> value, timeOverflowStage);
+                    if (isFinished) {
+                        _taskList.removeNext(before);
+                        node = before -> next;
+                    } else {
+                        before = node;
+                        node = node -> next;
+                    }
+                }
+
+            }
         }
 
     private:
@@ -49,20 +83,15 @@ class Async {
             return task;
         }
 
-        static bool _checkTask(
-                Task<TimeType>& task, 
-                TimeType (*timingFunction)(), 
-                TimeType maxTime,
-                bool timeOverflowStage
-            ) {
-            if (!task.isBlocked && (timingFunction() > task.time || timeOverflowStage)) {
+        bool _checkTask(Task<TimeType>& task, bool timeOverflowStage) {
+            if (!task.isBlocked && (_timingFunction() > task.time || timeOverflowStage)) {
                 task.execute();
                 if (task.once) {
                     return true;
                 }
-                TimeType time = timingFunction();
-                if (time > maxTime - task.interval) {
-                    task.time = time - (maxTime - task.interval);
+                TimeType time = _timingFunction();
+                if (time > _maxTime - task.interval) {
+                    task.time = time - (_maxTime - task.interval);
                     task.isBlocked = true;
                 } else {
                     task.time = time + task.interval;

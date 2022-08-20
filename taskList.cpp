@@ -20,95 +20,52 @@ struct TaskNode : ListNode {
 
 template <typename TimeType>
 struct TaskList {
-    public:
-        TaskNode<TimeType>* first;
-        TaskNode<TimeType>* last;
-        unsigned int length = 0;
+    TaskNode<TimeType>* first;
+    TaskNode<TimeType>* last;
+    unsigned int length = 0;
 
-        TaskList(): first(nullptr), last(nullptr) {}
+    TaskList(): first(nullptr), last(nullptr) {}
 
-        TaskNode<TimeType>* push(Task<TimeType> task) {
-            TaskNode<TimeType>* pointer = new TaskNode<TimeType>(task);
-            if (first != nullptr) {
-                last -> next = pointer;
-                last = pointer;
-            } else {
-                first = pointer;
-                last = pointer;
-            }
-            length++;
-            return pointer;
+    TaskNode<TimeType>* push(Task<TimeType> task) {
+        TaskNode<TimeType>* pointer = new TaskNode<TimeType>(task);
+        if (first != nullptr) {
+            last -> next = pointer;
+            last = pointer;
+        } else {
+            first = pointer;
+            last = pointer;
         }
+        length++;
+        return pointer;
+    }
 
-        void remove(ListNode* pointer) {
-            if (first == nullptr) return;
-            if (pointer == first) {
-                _removeFirst();
-                return;
-            }
-            TaskNode<TimeType>* beforeTarget = first;
-            while (beforeTarget -> next != pointer) {
-                beforeTarget = beforeTarget -> next;
-                if (beforeTarget == nullptr) return;
-            }
-            _remove(beforeTarget);
+    void remove(ListNode* pointer) {
+        if (first == nullptr) return;
+        if (pointer == first) {
+            removeFirst();
+            return;
         }
-
-        void forEach( // кажется весь этот функционал стоит перенести в класс Async
-                bool (*_callback)(Task<TimeType>&, TimeType (*)(), TimeType, bool), 
-                TimeType (*timingFunction)(),
-                TimeType maxTime,
-                TimeType& lastTime
-            ) {
-            TaskNode<TimeType>* before = first;
-            TaskNode<TimeType>* node = first;
-            bool timeOverflowStage = false;
-            while (node != nullptr) {
-                ///// странно, что я отслеживаю это здесь, но это самый удобный момент
-                TimeType time = timingFunction();
-                if (lastTime > time) {
-                    before = first;
-                    node = first;
-                    timeOverflowStage = true;
-                }
-                lastTime = time;
-                /////
-                if (node == first) {
-                    bool isFinished = _callback(node -> value, timingFunction, maxTime, timeOverflowStage);
-                    if (isFinished) {
-                        _removeFirst();
-                        node = first;
-                        before = first;
-                    } else {
-                        node = node -> next;
-                    }
-                } else {
-                    bool isFinished = _callback(node -> value, timingFunction, maxTime, timeOverflowStage);
-                    if (isFinished) {
-                        _remove(before);
-                        node = before -> next;
-                    } else {
-                        before = node;
-                        node = node -> next;
-                    }
-                }
-            }
+        TaskNode<TimeType>* before = first;
+        while (before -> next != pointer) {
+            before = before -> next;
+            if (before == nullptr) return;
         }
+        removeNext(before);
+    }
 
-        private:
-            void _removeFirst() {
-                TaskNode<TimeType>* target = first;
-                first = target -> next;
-                delete target;
-                length--;
-            }
+    void removeFirst() {
+        TaskNode<TimeType>* target = first;
+        first = target -> next;
+        delete target;
+        length--;
+    }
 
-            void _remove(TaskNode<TimeType>* before) {
-                TaskNode<TimeType>* target = before -> next;
-                before -> next = target -> next;
-                delete target;
-                length--;
-            }
+    void removeNext(TaskNode<TimeType>* before) {
+        TaskNode<TimeType>* target = before -> next;
+        before -> next = target -> next;
+        delete target;
+        length--;
+    }
 };
 
 // void remove(int index) {
