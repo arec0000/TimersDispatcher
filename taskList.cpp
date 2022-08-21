@@ -15,7 +15,7 @@ template <typename TimeType>
 struct TaskNode : ListNode {
     Task<TimeType> value;
     TaskNode<TimeType>* next;
-    TaskNode(Task<TimeType> _task): value(_task), next(nullptr) {}
+    TaskNode(Task<TimeType> task): value(task), next(nullptr) {}
 };
 
 template <typename TimeType>
@@ -67,30 +67,3 @@ struct TaskList {
         length--;
     }
 };
-
-// void remove(int index) {
-//     TaskNode<TimeType>* beforeTarget = first;
-//     if (index == 0) {
-//         first = beforeTarget -> next;
-//         delete beforeTarget;
-//         length--;
-//         return;
-//     }
-//     for (int i = 0; i < index - 1; i++) {
-//         beforeTarget = beforeTarget -> next;
-//     }
-//     TaskNode<TimeType>* target = beforeTarget -> next;
-//     beforeTarget -> next = target -> next;
-//     delete target;
-//     length--;
-// }
-
-// TaskNode<TimeType>* operator[](const int index) {
-//     if (first == nullptr) return nullptr;
-//     TaskNode<TimeType>* res = first;
-//     for (int i = 0; i < index; i++) {
-//         res = res -> next;
-//         if (res == nullptr) return nullptr;
-//     }
-//     return res;
-// }
