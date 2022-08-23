@@ -15,11 +15,11 @@ class TimersDispatcher {
         TimersDispatcher(TimeType (*timingFunction)(), TimeType maxTime):
             _timingFunction(timingFunction), _maxTime(maxTime) {}
 
-        TaskId* setTimeout(void (*callback)(), TimeType timeout) {
+        TaskId* setTimeout(bool (*callback)(), TimeType timeout) {
             return _taskList.push(_makeTask(callback, timeout, true));
         }
 
-        TaskId* setInterval(void (*callback)(), TimeType interval) {
+        TaskId* setInterval(bool (*callback)(), TimeType interval) {
             return _taskList.push(_makeTask(callback, interval, false));
         }
 
@@ -72,7 +72,7 @@ class TimersDispatcher {
         TimeType _maxTime;
         TimeType _lastTime;
 
-        Task<TimeType> _makeTask(void (*callback)(), TimeType interval, bool once) {
+        Task<TimeType> _makeTask(bool (*callback)(), TimeType interval, bool once) {
             Task<TimeType> task(callback, interval, once);
             if (_timingFunction() > _maxTime - interval) {
                 task.time = _timingFunction() - (_maxTime - interval);
@@ -85,8 +85,8 @@ class TimersDispatcher {
 
         bool _checkTask(Task<TimeType>& task, bool timeOverflowStage) {
             if (!task.isBlocked && (_timingFunction() > task.time || timeOverflowStage)) {
-                task.execute();
-                if (task.once) {
+                bool isFinished = task.execute();
+                if (task.once || isFinished) {
                     return true;
                 }
                 TimeType time = _timingFunction();

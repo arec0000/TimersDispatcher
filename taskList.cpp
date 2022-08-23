@@ -1,11 +1,11 @@
 template <typename TimeType>
 struct Task {
-    void (*execute)();
+    bool (*execute)();
     TimeType time;
     TimeType interval;
     bool once;
     bool isBlocked = false;
-    Task(void (*_function)(), TimeType _interval, bool _once):
+    Task(bool (*_function)(), TimeType _interval, bool _once):
         execute(_function), interval(_interval), once(_once) {}
 };
 
