@@ -63,6 +63,7 @@ struct TaskList {
     void removeNext(TaskNode<TimeType>* before) {
         TaskNode<TimeType>* target = before -> next;
         before -> next = target -> next;
+        if (last == target) last = before;
         delete target;
         length--;
     }
